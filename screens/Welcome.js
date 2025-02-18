@@ -1,62 +1,95 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
-import { Content, Wrapper, Title } from '../components/layout';
+import React from 'react';
+import { View, Text, StyleSheet, Image, SafeAreaView, StatusBar } from 'react-native';
+import { Content } from '../components/layout';
 import Button from '../components/controls/Button';
 import Colors from '../constants/Colors';
+import Fonts from '../constants/Fonts';
 
 const Welcome = ({ navigation }) => {
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            navigation.replace('Home'); // Using replace instead of navigate to prevent going back
-        }, 2000);
-
-        return () => clearTimeout(timer); // Cleanup timeout
-    }, []);
-
     return (
-        <Wrapper backgroundColor={Colors.black}>
-            <Content>
-                <View style={styles.container}>
-                    <View style={styles.backgroundContainer}>
-                        <Image source={require('../assets/seiko.png')} style={styles.backgroundImage} />
-                        <Text style={styles.welcomeText}>Welcome to the App!</Text>
-                    </View>
+        <SafeAreaView style={styles.safeArea}>
+            <StatusBar barStyle="light-content" backgroundColor="transparent" translucent={true} />
+            <View style={styles.container}>
+                <View style={styles.logoContainer}>
+                    <Image 
+                        source={require('../assets/seiko.png')} 
+                        style={styles.logo}
+                        resizeMode="contain"
+                    />
+                    <Text style={styles.welcomeText}>Welcome to Seiko Store</Text>
                 </View>
-                <Title color={Colors.white} title="Welcome to Seiko App" />
-            </Content>
-        </Wrapper>
+                
+                <Text style={styles.subtitle}>Luxury Watches Collection</Text>
+
+                <View style={styles.buttonContainer}>
+                    <Button 
+                        type="primary"
+                        label="Create Account"
+                        onPress={() => navigation.navigate('SignUp')}
+                        style={styles.button}
+                    />
+                    <Text style={styles.orText}>Already have an account?</Text>
+                    <Button 
+                        type="secondary"
+                        label="Login"
+                        onPress={() => navigation.navigate('Login')}
+                        style={styles.button}
+                    />
+                </View>
+            </View>
+        </SafeAreaView>
     );
 };
 
-export default Welcome;
-
 const styles = StyleSheet.create({
+    safeArea: {
+        flex: 1,
+        backgroundColor: Colors.black,
+        paddingTop: StatusBar.currentHeight,
+    },
     container: {
         flex: 1,
-        backgroundColor: Colors.darkGray, // Temporary background color
+        justifyContent: 'space-between',
+        padding: 20,
     },
-    backgroundContainer: {
-        flex: 1,
-        justifyContent: 'center',
+    logoContainer: {
         alignItems: 'center',
+        marginTop: 60,
+    },
+    logo: {
+        width: 200,
+        height: 100,
+        marginBottom: 20,
     },
     welcomeText: {
         color: Colors.white,
-        fontSize: 24,
-        fontWeight: 'bold',
+        fontSize: 28,
+        fontFamily: Fonts.family.bold,
+        textAlign: 'center',
+        marginBottom: 10,
     },
-    background: {
-        marginBottom: 20,
-        marginTop: 50,
-        width: '100%',
+    subtitle: {
+        color: Colors.lightGray,
+        fontSize: 18,
+        fontFamily: Fonts.family.regular,
+        textAlign: 'center',
+        marginVertical: 20,
     },
-    backgroundImage: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        bottom: 0,
-        right: 0,
+    buttonContainer: {
         width: '100%',
-        height: '100%',
-    }
+        marginTop: 'auto',
+        paddingBottom: 20,
+    },
+    button: {
+        marginVertical: 8,
+    },
+    orText: {
+        color: Colors.white,
+        textAlign: 'center',
+        marginVertical: 8,
+        fontSize: 16,
+        fontFamily: Fonts.family.regular,
+    },
 });
+
+export default Welcome;

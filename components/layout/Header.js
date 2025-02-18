@@ -1,43 +1,53 @@
 import { View, Image, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { Ionicons, EvilIcons } from "@expo/vector-icons";
 import Colors from "../../constants/Colors";
 import Fonts from "../../constants/Fonts";
-export default function Header({ title }) {
+import ProfileButton from "../controls/Profile_Button";
+
+export default function Header({ title, navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.logoContainer}>
-        {title && <Text style={styles.title}>{title}</Text>}
-        <Image style={styles.logo}source={require("../../assets/seiko.png")} />
+        <Image style={styles.logo} source={require("../../assets/seiko.png")} />
+      </View>
+      <View style={styles.profileContainer}>
+        <ProfileButton onPress={() => navigation.navigate('Profile')} />
       </View>
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
     flexDirection: "row",
-    justifyContent: "center",
-    paddingBottom:30,
-    paddingHorizontal: 30,
-    paddingTop:40,
+    justifyContent: "space-between",
+    paddingBottom: 30,
+    paddingHorizontal: 20,
+    paddingTop: 40,
   },
-  logo:{
-    height:100,
-    width:100,
+  logo: {
+    height: 100,
+    width: 100,
   },
-  logoContainer:{
-    alignItems: 'center'
+  logoContainer: {
+    alignItems: 'center',
+    flex: 1,
   },
-  title:{
+  title: {
     backgroundColor: Colors.white,
     borderColor: Colors.platinum,
     borderRadius: 20,
-    borderWidth:1,
+    borderWidth: 1,
     color: Colors.jet,
     fontFamily: Fonts.family.bold,
     fontSize: Fonts.size.normal,
     paddingHorizontal: 10,
     paddingVertical: 5,
-    marginBottom:10,
-  }
+    marginBottom: 10,
+  },
+  profileContainer: {
+    position: 'absolute',
+    right: 20,
+    top: 40,
+  },
 });

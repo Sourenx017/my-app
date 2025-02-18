@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, FlatList, StyleSheet } from 'react-native';
+import { View, FlatList, StyleSheet, SafeAreaView } from 'react-native';
 import ProductCard from '../components/controls/ProductCard';
 import BottomNav from '../components/layout/BottomNav';
 import Colors from '../constants/Colors';
@@ -42,17 +42,20 @@ export default function Home({ navigation }) {
 
   return (
     <View style={styles.mainContainer}>
-      <FlatList
-        data={products}
-        renderItem={({ item }) => (
-          <ProductCard
-            product={item}
-            onPress={() => handleProductPress(item)}
-          />
-        )}
-        keyExtractor={item => item.id}
-        style={styles.list}
-      />
+      <SafeAreaView style={styles.safeArea}>
+        <FlatList
+          data={products}
+          renderItem={({ item }) => (
+            <ProductCard
+              product={item}
+              onPress={() => handleProductPress(item)}
+            />
+          )}
+          keyExtractor={item => item.id}
+          style={styles.list}
+          contentContainerStyle={styles.listContent}
+        />
+      </SafeAreaView>
       <BottomNav navigation={navigation} currentScreen="Home" />
     </View>
   );
@@ -63,7 +66,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.white,
   },
+  safeArea: {
+    flex: 1,
+  },
   list: {
     flex: 1,
+  },
+  listContent: {
+    paddingBottom: 20,
   },
 });

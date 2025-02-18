@@ -16,19 +16,24 @@ export default function Button({ onPress, label, type, disabled, style }) {
 
 const styles = StyleSheet.create({
   button: {
-    paddingVertical: 12,
+    paddingVertical: 15,
     paddingHorizontal: 20,
-    borderRadius: 8,
-    marginVertical: 10,
+    borderRadius: 10,
+    marginVertical: 8,
     alignItems: 'center',
     width: '100%',
   },
   primary: {
     backgroundColor: Colors.darkGray,
+    elevation: 3,
+    shadowColor: Colors.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   secondary: {
     backgroundColor: Colors.white,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: Colors.darkGray,
   },
   addToCart: {
@@ -36,11 +41,12 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
   },
   disabled: {
-    opacity: 0.5,
+    opacity: 0.6,
   },
   text: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
+    letterSpacing: 0.5,
   },
   primaryText: {
     color: Colors.white,

@@ -1,4 +1,4 @@
-import { createDrawerNavigator } from '@react-navigation/drawer'; // Update the import statement
+import { createDrawerNavigator } from '@react-navigation/drawer';
 const Drawer = createDrawerNavigator();
 import Home from '../screens/Home';
 import Profile from '../screens/Profile';

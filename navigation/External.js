@@ -10,11 +10,6 @@ export default function External() {
     return (
         <stack.Navigator initialRouteName='Welcome'>
             <stack.Screen 
-                name='Login' 
-                component={Login} 
-                options={{ headerShown: false }}
-            />
-            <stack.Screen 
                 name='Welcome' 
                 component={Welcome} 
                 options={{ headerShown: false }}
@@ -22,6 +17,11 @@ export default function External() {
             <stack.Screen 
                 name='SignUp' 
                 component={SignUp} 
+                options={{ headerShown: false }}
+            />
+            <stack.Screen 
+                name='Login' 
+                component={Login} 
                 options={{ headerShown: false }}
             />
         </stack.Navigator>
