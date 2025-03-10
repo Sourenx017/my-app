@@ -1,22 +1,33 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
 import Colors from '../constants/Colors';
 import Fonts from '../constants/Fonts';
 import Button from '../components/controls/Button';
 import BottomNav from '../components/layout/BottomNav';
 import { useCart } from '../context/CartContext';
+import ColorVariantModal from '../components/controls/modal/ColorVariantModal';
 
 function ProductDetails({ route, navigation }) {
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => null,
+      gestureEnabled: false,
+    });
+  }, [navigation]);
+
   const { productName, price, image, description } = route.params || {};
   const { addToCart } = useCart();
+  const [colorModalVisible, setColorModalVisible] = useState(false);
+  const [selectedColor, setSelectedColor] = useState('Silver');
 
   const handleAddToCart = () => {
     addToCart({
-      id: Date.now().toString(), // temporary id solution
+      id: Date.now().toString(),
       name: productName,
       price,
       image,
       description,
+      color: selectedColor,
     });
     navigation.navigate('Cart');
   };
@@ -35,6 +46,16 @@ function ProductDetails({ route, navigation }) {
           <Text style={styles.name}>{productName}</Text>
           <Text style={styles.price}>${price}</Text>
           <Text style={styles.description}>{description}</Text>
+          
+          <View style={styles.colorSection}>
+            <Text style={styles.colorLabel}>Selected Color: {selectedColor}</Text>
+            <Button 
+              type="secondary"
+              label="Change Color"
+              onPress={() => setColorModalVisible(true)}
+              style={styles.colorButton}
+            />
+          </View>
         </View>
         <Button 
           type="primary"
@@ -43,6 +64,14 @@ function ProductDetails({ route, navigation }) {
           style={styles.addToCartButton}
         />
       </ScrollView>
+      
+      <ColorVariantModal 
+        visible={colorModalVisible}
+        onClose={() => setColorModalVisible(false)}
+        onSelectColor={setSelectedColor}
+        selectedColor={selectedColor}
+      />
+      
       <BottomNav navigation={navigation} currentScreen="ProductDetails" />
     </View>
   );
@@ -104,6 +133,27 @@ const styles = StyleSheet.create({
   },
   addToCartButton: {
     marginTop: 20,
+    alignSelf: 'auto',
+    marginHorizontal: 20,
+    marginBottom: 20,
+    width: 'auto',
+  },
+  colorSection: {
+    marginVertical: 20,
+    padding: 15,
+    backgroundColor: Colors.inputBackground,
+    borderRadius: 8,
+    marginHorizontal: 20,
+    width: 'auto',
+  },
+  colorLabel: {
+    fontSize: Fonts.size.normal,
+    fontFamily: Fonts.family.bold,
+    color: Colors.darkGray,
+    marginBottom: 10,
+  },
+  colorButton: {
+    marginTop: 10,
   },
 });
 

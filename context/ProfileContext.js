@@ -6,11 +6,19 @@ export const ProfileContext = createContext({
   setProfile: () => {},
 });
 
+// Default root user
+const ROOT_USER = {
+  name: 'Root User',
+  email: 'root',
+  password: 'root',
+  address: '',
+  phone: ''
+};
+
 export function ProfileProvider({ children }) {
   const [profile, setProfileState] = useState(null);
 
   useEffect(() => {
-    // Cargar el perfil guardado cuando se inicia la app
     loadProfile();
   }, []);
 
@@ -19,6 +27,10 @@ export function ProfileProvider({ children }) {
       const savedProfile = await AsyncStorage.getItem('userProfile');
       if (savedProfile) {
         setProfileState(JSON.parse(savedProfile));
+      } else {
+        // Set root user as default if no profile exists
+        await AsyncStorage.setItem('userProfile', JSON.stringify(ROOT_USER));
+        setProfileState(ROOT_USER);
       }
     } catch (error) {
       console.log('Error loading profile:', error);

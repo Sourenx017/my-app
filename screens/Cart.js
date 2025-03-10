@@ -8,6 +8,13 @@ import { useCart } from '../context/CartContext';
 import Button from '../components/controls/Button';
 
 export default function Cart({ navigation }) {
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => null,
+      gestureEnabled: false,
+    });
+  }, [navigation]);
+
   const { cartItems, getTotal } = useCart();
 
   return (

@@ -1,95 +1,89 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, SafeAreaView, StatusBar } from 'react-native';
-import { Content } from '../components/layout';
+import { View, Text, StyleSheet, Image } from 'react-native';
 import Button from '../components/controls/Button';
 import Colors from '../constants/Colors';
 import Fonts from '../constants/Fonts';
 
-const Welcome = ({ navigation }) => {
-    return (
-        <SafeAreaView style={styles.safeArea}>
-            <StatusBar barStyle="light-content" backgroundColor="transparent" translucent={true} />
-            <View style={styles.container}>
-                <View style={styles.logoContainer}>
-                    <Image 
-                        source={require('../assets/seiko.png')} 
-                        style={styles.logo}
-                        resizeMode="contain"
-                    />
-                    <Text style={styles.welcomeText}>Welcome to Seiko Store</Text>
-                </View>
-                
-                <Text style={styles.subtitle}>Luxury Watches Collection</Text>
+export default function Welcome({ navigation }) {
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => null, // This removes the back button
+      gestureEnabled: false, // This prevents back gesture on iOS
+    });
+  }, [navigation]);
 
-                <View style={styles.buttonContainer}>
-                    <Button 
-                        type="primary"
-                        label="Create Account"
-                        onPress={() => navigation.navigate('SignUp')}
-                        style={styles.button}
-                    />
-                    <Text style={styles.orText}>Already have an account?</Text>
-                    <Button 
-                        type="secondary"
-                        label="Login"
-                        onPress={() => navigation.navigate('Login')}
-                        style={styles.button}
-                    />
-                </View>
-            </View>
-        </SafeAreaView>
-    );
-};
+  return (
+    <View style={styles.container}>
+      <View style={styles.logoContainer}>
+        <Image 
+          source={require('../assets/seiko.png')} 
+          style={styles.logo}
+          resizeMode="contain"
+        />
+      </View>
+      
+      <View style={styles.content}>
+        <Text style={styles.title}>Welcome to Watch Store</Text>
+        <Text style={styles.subtitle}>
+          Discover our exclusive collection of luxury watches
+        </Text>
+        
+        <View style={styles.buttonContainer}>
+          <Button 
+            type="primary"
+            label="Login"
+            onPress={() => navigation.navigate('Login')}
+            style={styles.button}
+          />
+          <Button 
+            type="secondary"
+            label="Create Account"
+            onPress={() => navigation.navigate('SignUp')}
+            style={styles.button}
+          />
+        </View>
+      </View>
+    </View>
+  );
+}
 
 const styles = StyleSheet.create({
-    safeArea: {
-        flex: 1,
-        backgroundColor: Colors.black,
-        paddingTop: StatusBar.currentHeight,
-    },
-    container: {
-        flex: 1,
-        justifyContent: 'space-between',
-        padding: 20,
-    },
-    logoContainer: {
-        alignItems: 'center',
-        marginTop: 60,
-    },
-    logo: {
-        width: 200,
-        height: 100,
-        marginBottom: 20,
-    },
-    welcomeText: {
-        color: Colors.white,
-        fontSize: 28,
-        fontFamily: Fonts.family.bold,
-        textAlign: 'center',
-        marginBottom: 10,
-    },
-    subtitle: {
-        color: Colors.lightGray,
-        fontSize: 18,
-        fontFamily: Fonts.family.regular,
-        textAlign: 'center',
-        marginVertical: 20,
-    },
-    buttonContainer: {
-        width: '100%',
-        marginTop: 'auto',
-        paddingBottom: 20,
-    },
-    button: {
-        marginVertical: 8,
-    },
-    orText: {
-        color: Colors.white,
-        textAlign: 'center',
-        marginVertical: 8,
-        fontSize: 16,
-        fontFamily: Fonts.family.regular,
-    },
+  container: {
+    flex: 1,
+    backgroundColor: Colors.white,
+  },
+  logoContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logo: {
+    width: 200,
+    height: 100,
+  },
+  content: {
+    flex: 1,
+    padding: 20,
+    justifyContent: 'center',
+  },
+  title: {
+    fontSize: Fonts.size.xlarge,
+    fontFamily: Fonts.family.bold,
+    color: Colors.darkGray,
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  subtitle: {
+    fontSize: Fonts.size.normal,
+    fontFamily: Fonts.family.regular,
+    color: Colors.gray,
+    textAlign: 'center',
+    marginBottom: 40,
+  },
+  buttonContainer: {
+    gap: 15,
+  },
+  button: {
+    width: '100%',
+  },
 });
-
-export default Welcome;

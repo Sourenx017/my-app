@@ -1,4 +1,4 @@
-import React from 'react';
+  import React from 'react';
 import { View, FlatList, StyleSheet, SafeAreaView } from 'react-native';
 import ProductCard from '../components/controls/ProductCard';
 import BottomNav from '../components/layout/BottomNav';
@@ -32,6 +32,13 @@ const products = [
 ];
 
 export default function Home({ navigation }) {
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => null,
+      gestureEnabled: false,
+    });
+  }, [navigation]);
+
   const handleProductPress = (product) => {
     navigation.navigate('ProductDetails', {
       productName: product.name,

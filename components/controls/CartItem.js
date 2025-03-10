@@ -16,6 +16,7 @@ export default function CartItem({ item }) {
       />
       <View style={styles.details}>
         <Text style={styles.name}>{item.name}</Text>
+        <Text style={styles.color}>Color: {item.color}</Text>
         <Text style={styles.price}>${item.price}</Text>
         <View style={styles.quantityContainer}>
           <TouchableOpacity onPress={() => updateQuantity(item.id, item.quantity - 1)}>
@@ -84,5 +85,11 @@ const styles = StyleSheet.create({
   removeText: {
     fontSize: 24,
     color: Colors.darkGray,
+  },
+  color: {
+    fontFamily: Fonts.family.regular,
+    fontSize: Fonts.size.normal,
+    color: Colors.gray,
+    marginBottom: 5,
   },
 });
