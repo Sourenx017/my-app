@@ -5,6 +5,7 @@ import Colors from '../constants/Colors';
 import Fonts from '../constants/Fonts';
 import { useProfile } from '../context/ProfileContext';
 import FormItem from '../components/controls/FormItem';
+import BottomNav from '../components/layout/BottomNav';
 
 export default function Profile({ navigation }) {
   React.useLayoutEffect(() => {
@@ -110,11 +111,19 @@ export default function Profile({ navigation }) {
 
         <Button
           type="secondary"
+          label="Order History"
+          onPress={() => navigation.navigate('OrderHistory')}
+          style={styles.orderHistoryButton}
+        />
+
+        <Button
+          type="secondary"
           label="Logout"
           onPress={handleLogout}
           style={styles.logoutButton}
         />
       </View>
+      <BottomNav navigation={navigation} currentScreen="Profile" />
     </ScrollView>
   );
 }
@@ -160,7 +169,10 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.family.regular,
     color: Colors.gray,
   },
+  orderHistoryButton: {
+    marginTop: 30,
+  },
   logoutButton: {
-    marginTop: 40,
+    marginTop: 15,
   },
 });

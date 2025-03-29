@@ -5,6 +5,7 @@ import Profile from '../screens/Profile';
 import ProfileButton from '../components/controls/Profile_Button';
 const ProductDetails = require('../screens/ProductDetails');
 import Cart from '../screens/Cart';
+import OrderHistory from '../screens/OrderHistory';
 import External from './External';
 import Dashboard from './Dashboard';
 import SignUp from '../screens/SignUp';
@@ -77,6 +78,13 @@ export default function AppNavigator() {
         component={Cart}
         options={{
           title: "Shopping Cart",
+        }}
+      />
+      <Stack.Screen 
+        name="OrderHistory" 
+        component={OrderHistory}
+        options={{
+          title: "Order History",
         }}
       />
     </Stack.Navigator>
