@@ -1,11 +1,32 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
-import Button from '../components/controls/Button';
-import Colors from '../constants/Colors';
-import Fonts from '../constants/Fonts';
-import { useProfile } from '../context/ProfileContext';
-import FormItem from '../components/controls/FormItem';
-import BottomNav from '../components/layout/BottomNav';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  ScrollView,
+  ActivityIndicator,
+} from "react-native";
+import Button from "../components/controls/Button";
+import Colors from "../constants/Colors";
+import Fonts from "../constants/Fonts";
+import { useProfile } from "../context/ProfileContext";
+import FormItem from "../components/controls/FormItem";
+import BottomNav from "../components/layout/BottomNav";
+import { logout } from "../services/firebase-service";
+
+import { getAuth } from "firebase/auth";
+import { auth, db } from "../firebase-config";
+import { doc, onSnapshot } from "firebase/firestore";
+
+const [loading, setLoading] = useState(false);
+const [data, setData] = useState({
+  name: user?.displayName || profile?.name || "",
+  email: user?.email || profile?.email || "",
+  address: profile?.address || "",
+  phone: profile?.phone || "",
+});
+const [editedProfile, setEditedProfile] = useState(data);
 
 export default function Profile({ navigation }) {
   React.useLayoutEffect(() => {
@@ -14,34 +35,62 @@ export default function Profile({ navigation }) {
       gestureEnabled: false,
     });
   }, [navigation]);
-
   const { profile, setProfile } = useProfile();
   const [isEditing, setIsEditing] = useState(false);
-  const [editedProfile, setEditedProfile] = useState({
-    name: profile?.name || '',
-    email: profile?.email || '',
-    address: profile?.address || '',
-    phone: profile?.phone || '',
+  const [loading, setLoading] = useState(false);
+  const user = auth.currentUser;
+  const subscriber = onSnapshot(doc(db, "users", user?.uid || ""), (doc) => {
+    if (doc.exists()) {
+      const userData = docSnap.data();
+      setData((prevData) => ({
+        ...prevData,
+        name: userData.name || user?.displayName || "",
+        email: userData.email || user?.email || "",
+        address: userData.address || "",
+        phone: userData.phone || "",
+      }));
+    }
   });
-
-  const handleSave = () => {
+  const handleSave = async () => {
     setProfile({
       ...profile,
-      ...editedProfile
+      ...editedProfile,
     });
+    setData(editedProfile); // Update data state with new profile info
+    // Update Firebase Auth profile if name or email changed
+    try {
+      if (user) {
+        if (user.displayName !== editedProfile.name) {
+          await user.updateProfile({ displayName: editedProfile.name });
+        }
+        if (user.email !== editedProfile.email) {
+          await user.updateEmail(editedProfile.email);
+        }
+      }
+    } catch (error) {
+      console.log("Profile update error:", error);
+    }
     setIsEditing(false);
   };
 
-  const handleLogout = () => {
-    setProfile(null);
-    navigation.replace('Welcome');
+  const handleLogout = async () => {
+    setLoading(true);
+    try {
+      await logout();
+      setProfile(null);
+      navigation.replace("Welcome");
+    } catch (error) {
+      console.log("Logout error:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Image 
-          source={require('../assets/picture_profile.jpg')} 
+        <Image
+          source={require("../assets/picture_profile.jpg")}
           style={styles.profileImage}
         />
         {!isEditing ? (
@@ -67,24 +116,32 @@ export default function Profile({ navigation }) {
             <FormItem
               label="Name"
               value={editedProfile.name}
-              onChangeText={(text) => setEditedProfile({...editedProfile, name: text})}
+              onChangeText={(text) =>
+                setEditedProfile({ ...editedProfile, name: text })
+              }
             />
             <FormItem
               label="Email"
               value={editedProfile.email}
-              onChangeText={(text) => setEditedProfile({...editedProfile, email: text})}
+              onChangeText={(text) =>
+                setEditedProfile({ ...editedProfile, email: text })
+              }
               keyboardType="email-address"
             />
             <FormItem
               label="Address"
               value={editedProfile.address}
-              onChangeText={(text) => setEditedProfile({...editedProfile, address: text})}
+              onChangeText={(text) =>
+                setEditedProfile({ ...editedProfile, address: text })
+              }
               multiline
             />
             <FormItem
               label="Phone Number"
               value={editedProfile.phone}
-              onChangeText={(text) => setEditedProfile({...editedProfile, phone: text})}
+              onChangeText={(text) =>
+                setEditedProfile({ ...editedProfile, phone: text })
+              }
               keyboardType="phone-pad"
             />
           </>
@@ -100,28 +157,38 @@ export default function Profile({ navigation }) {
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.label}>Address:</Text>
-              <Text style={styles.value}>{profile?.address || 'Not specified'}</Text>
+              <Text style={styles.value}>
+                {profile?.address || "Not specified"}
+              </Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.label}>Phone:</Text>
-              <Text style={styles.value}>{profile?.phone || 'Not specified'}</Text>
+              <Text style={styles.value}>
+                {profile?.phone || "Not specified"}
+              </Text>
             </View>
           </>
-        )}
-
+        )}{" "}
         <Button
           type="secondary"
           label="Order History"
-          onPress={() => navigation.navigate('OrderHistory')}
+          onPress={() => navigation.navigate("OrderHistory")}
           style={styles.orderHistoryButton}
         />
-
-        <Button
-          type="secondary"
-          label="Logout"
-          onPress={handleLogout}
-          style={styles.logoutButton}
-        />
+        {loading ? (
+          <ActivityIndicator
+            size="large"
+            color={Colors.primary}
+            style={styles.logoutButton}
+          />
+        ) : (
+          <Button
+            type="danger"
+            label="Logout"
+            onPress={handleLogout}
+            style={styles.logoutButton}
+          />
+        )}
       </View>
       <BottomNav navigation={navigation} currentScreen="Profile" />
     </ScrollView>
@@ -134,7 +201,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
   },
   header: {
-    alignItems: 'center',
+    alignItems: "center",
     padding: 20,
     borderBottomWidth: 1,
     borderBottomColor: Colors.lightGray,
@@ -152,7 +219,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   infoRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: Colors.lightGray,

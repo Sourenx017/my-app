@@ -1,20 +1,135 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Image, SafeAreaView } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, TextInput, StyleSheet, Image, SafeAreaView, ActivityIndicator, Alert, Keyboard } from 'react-native';
 import Button from '../components/controls/Button';
 import Colors from '../constants/Colors';
 import Fonts from '../constants/Fonts';
 import { useProfile } from '../context/ProfileContext';
+import { loginWIthEmailAndPassword } from '../services/firebase-service';
 
 export default function Login({ navigation }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const { profile, setProfile } = useProfile();
+  // Estado para el formulario y validación
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
+  const [formErrors, setFormErrors] = useState({
+    email: '',
+    password: ''
+  });
+  const [loading, setLoading] = useState(false);
+  const [isFormValid, setIsFormValid] = useState(false);
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  
+  const { profile, setProfile, isAuthenticated, currentUser } = useProfile();
 
-  const handleLogin = () => {
-    if (email && password) {
-      if (profile && profile.email === email && profile.password === password) {
-        navigation.replace('Home');
-      }
+  // Manejar cambios en los campos del formulario
+  const handleInputChange = useCallback((field, value) => {
+    setFormData(prevData => ({
+      ...prevData,
+      [field]: value
+    }));
+    
+    // Limpiar el error cuando el usuario comienza a escribir
+    if (formErrors[field]) {
+      setFormErrors(prev => ({
+        ...prev,
+        [field]: ''
+      }));
+    }
+  }, [formErrors]);
+
+  // Validar el formulario cuando los datos cambian
+  useEffect(() => {
+    const validateForm = () => {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const isEmailValid = formData.email.trim() !== '' && emailRegex.test(formData.email);
+      const isPasswordValid = formData.password.length >= 6;
+      
+      setIsFormValid(isEmailValid && isPasswordValid);
+    };
+    
+    validateForm();
+  }, [formData]);
+
+  // Verificar si el usuario ya está autenticado
+  useEffect(() => {
+    if (isAuthenticated && currentUser) {
+      navigation.replace('Home');
+    }
+  }, [isAuthenticated, currentUser, navigation]);
+
+  // Mostrar alerta si hay demasiados intentos fallidos de login
+  useEffect(() => {
+    if (loginAttempts >= 3) {
+      Alert.alert(
+        "Demasiados intentos",
+        "Has intentado iniciar sesión varias veces sin éxito. Por favor, verifica tus credenciales o intenta recuperar tu contraseña.",
+        [{ text: "OK", onPress: () => setLoginAttempts(0) }]
+      );
+    }
+  }, [loginAttempts]);
+
+  const validateFields = () => {
+    const errors = {
+      email: '',
+      password: ''
+    };
+    
+    // Validar email
+    if (!formData.email) {
+      errors.email = 'El email es requerido';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errors.email = 'Email inválido';
+    }
+    
+    // Validar contraseña
+    if (!formData.password) {
+      errors.password = 'La contraseña es requerida';
+    } else if (formData.password.length < 6) {
+      errors.password = 'La contraseña debe tener al menos 6 caracteres';
+    }
+    
+    setFormErrors(errors);
+    return !errors.email && !errors.password;
+  };
+
+  const handleLogin = async () => {
+    Keyboard.dismiss();
+    
+    if (!validateFields()) {
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const userCredential = await loginWIthEmailAndPassword(
+        formData.email, 
+        formData.password
+      );
+      const user = userCredential.user;
+      
+      // Update the profile with Firebase user info
+      setProfile({
+        ...profile,
+        email: user.email,
+        uid: user.uid,
+        emailVerified: user.emailVerified,
+        lastLogin: new Date().toISOString()
+      });
+      
+      // Reiniciar intentos de login
+      setLoginAttempts(0);
+      
+      // Navigate to home screen
+      navigation.replace('Home');
+    } catch (error) {
+      // Aumentar contador de intentos fallidos
+      setLoginAttempts(prev => prev + 1);
+      
+      console.log('Login error:', error);
+      // Los errores ya se manejan en el servicio, pero podemos personalizar aquí
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -33,29 +148,43 @@ export default function Login({ navigation }) {
           <Text style={styles.title}>Welcome Back</Text>
           
           <TextInput
-            style={styles.input}
+            style={[styles.input, formErrors.email ? styles.inputError : null]}
             placeholder="Email"
             placeholderTextColor={Colors.gray}
-            value={email}
-            onChangeText={setEmail}
+            value={formData.email}
+            onChangeText={(value) => handleInputChange('email', value)}
             keyboardType="email-address"
             autoCapitalize="none"
+            editable={!loading}
           />
+          {formErrors.email ? (
+            <Text style={styles.errorText}>{formErrors.email}</Text>
+          ) : null}
+          
           <TextInput
-            style={styles.input}
+            style={[styles.input, formErrors.password ? styles.inputError : null]}
             placeholder="Password"
             placeholderTextColor={Colors.gray}
-            value={password}
-            onChangeText={setPassword}
+            value={formData.password}
+            onChangeText={(value) => handleInputChange('password', value)}
             secureTextEntry
+            editable={!loading}
           />
+          {formErrors.password ? (
+            <Text style={styles.errorText}>{formErrors.password}</Text>
+          ) : null}
 
-          <Button 
-            type="primary"
-            label="Login"
-            onPress={handleLogin}
-            style={styles.loginButton}
-          />
+          {loading ? (
+            <ActivityIndicator size="large" color={Colors.primary} style={styles.loader} />
+          ) : (
+            <Button 
+              type="primary"
+              label="Login"
+              onPress={handleLogin}
+              style={styles.loginButton}
+              disabled={!isFormValid}
+            />
+          )}
           
           <View style={styles.signUpContainer}>
             <Text style={styles.signUpText}>Don't have an account?</Text>
@@ -64,6 +193,7 @@ export default function Login({ navigation }) {
               label="Create Account"
               onPress={() => navigation.navigate('SignUp')}
               style={styles.signUpButton}
+              disabled={loading}
             />
           </View>
         </View>
@@ -113,6 +243,8 @@ const styles = StyleSheet.create({
     fontSize: Fonts.size.normal,
     fontFamily: Fonts.family.regular,
     color: Colors.darkGray,
+  },  inputError: {
+    borderColor: Colors.error,
   },
   loginButton: {
     marginTop: 10,
@@ -131,5 +263,14 @@ const styles = StyleSheet.create({
   signUpButton: {
     width: '100%',
     borderColor: Colors.darkGray,
+  },  errorText: {
+    color: Colors.error,
+    fontSize: Fonts.size.small,
+    fontFamily: Fonts.family.regular,
+    marginBottom: 10,
+    marginTop: -10,
+  },
+  loader: {
+    marginVertical: 20,
   },
 });

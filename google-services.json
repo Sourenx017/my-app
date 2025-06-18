@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "450718148128",
+    "project_id": "seiko-app-962a5",
+    "storage_bucket": "seiko-app-962a5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:450718148128:android:bfc756f8b45db693ad3e45",
+        "android_client_info": {
+          "package_name": "com.omastar.seikoapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "450718148128-u0o259injg4d2ver6t31ra9vm7mu3lbv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDxJKgUTQjVrawG6bYx1jfMnKPNoPEciLE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "450718148128-u0o259injg4d2ver6t31ra9vm7mu3lbv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,57 +1,70 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { auth } from '../firebase-config';
+import { onAuthStateChanged } from 'firebase/auth';
 
 export const ProfileContext = createContext({
   profile: null,
   setProfile: () => {},
+  currentUser: null,
+  isAuthenticated: false,
 });
-
-// Default root user
-const ROOT_USER = {
-  name: 'Root User',
-  email: 'root',
-  password: 'root',
-  address: '',
-  phone: ''
-};
 
 export function ProfileProvider({ children }) {
   const [profile, setProfileState] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
 
+  // Listen for Firebase auth state changes
   useEffect(() => {
-    loadProfile();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+      if (user) {
+        loadProfile(user.uid);
+      }
+    });
+    
+    return () => unsubscribe();
   }, []);
 
-  const loadProfile = async () => {
+  // Load profile from AsyncStorage
+  const loadProfile = async (uid) => {
     try {
-      const savedProfile = await AsyncStorage.getItem('userProfile');
+      const savedProfile = await AsyncStorage.getItem(`userProfile_${uid}`);
       if (savedProfile) {
         setProfileState(JSON.parse(savedProfile));
-      } else {
-        // Set root user as default if no profile exists
-        await AsyncStorage.setItem('userProfile', JSON.stringify(ROOT_USER));
-        setProfileState(ROOT_USER);
       }
     } catch (error) {
       console.log('Error loading profile:', error);
     }
   };
 
+  // Save profile to AsyncStorage
   const setProfile = async (newProfile) => {
     try {
       if (newProfile) {
-        await AsyncStorage.setItem('userProfile', JSON.stringify(newProfile));
+        const uid = newProfile.uid || (currentUser && currentUser.uid);
+        if (uid) {
+          await AsyncStorage.setItem(`userProfile_${uid}`, JSON.stringify(newProfile));
+          setProfileState(newProfile);
+        }
       } else {
-        await AsyncStorage.removeItem('userProfile');
+        // If newProfile is null, we're logging out
+        setProfileState(null);
       }
-      setProfileState(newProfile);
     } catch (error) {
       console.log('Error saving profile:', error);
     }
   };
 
+  const contextValue = {
+    profile,
+    setProfile,
+    currentUser,
+    isAuthenticated: !!currentUser,
+  };
+
   return (
-    <ProfileContext.Provider value={{ profile, setProfile }}>
+    <ProfileContext.Provider value={contextValue}>
       {children}
     </ProfileContext.Provider>
   );
