@@ -14,19 +14,17 @@
     },
     "ios": {
       "supportsTablet": true
-    },
-    "android": {
+    },    "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#000000"
       },
       "package": "com.omastar.seikoapp",
-      "googleServicesFile": "./google-services.json",
       "softwareKeyboardLayoutMode": "pan"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [["@react-native-google-signin/google-signin", "expo-font"]]
+    "plugins": ["expo-font"]
   }
 }

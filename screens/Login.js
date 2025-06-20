@@ -4,7 +4,6 @@ import Button from '../components/controls/Button';
 import Colors from '../constants/Colors';
 import Fonts from '../constants/Fonts';
 import { useProfile } from '../context/ProfileContext';
-import { loginWIthEmailAndPassword } from '../services/firebase-service';
 
 export default function Login({ navigation }) {
   // Estado para el formulario y validación
@@ -19,10 +18,9 @@ export default function Login({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
   const [loginAttempts, setLoginAttempts] = useState(0);
-  
-  const { profile, setProfile, isAuthenticated, currentUser } = useProfile();
+    const { profile, login } = useProfile();
 
-  // Manejar cambios en los campos del formulario
+  // Manejar el login
   const handleInputChange = useCallback((field, value) => {
     setFormData(prevData => ({
       ...prevData,
@@ -99,26 +97,15 @@ export default function Login({ navigation }) {
     if (!validateFields()) {
       return;
     }
-    
-    setLoading(true);
+      setLoading(true);
     try {
-      const userCredential = await loginWIthEmailAndPassword(
-        formData.email, 
-        formData.password
-      );
-      const user = userCredential.user;
-      
-      // Update the profile with Firebase user info
-      setProfile({
-        ...profile,
-        email: user.email,
-        uid: user.uid,
-        emailVerified: user.emailVerified,
-        lastLogin: new Date().toISOString()
-      });
+      await login(formData.email, formData.password);
       
       // Reiniciar intentos de login
       setLoginAttempts(0);
+      
+      // Navigate to main app
+      navigation.replace('Home');
       
       // Navigate to home screen
       navigation.replace('Home');

@@ -40,6 +40,11 @@ export default function Welcome({ navigation }) {
             label="Create Account"
             onPress={() => navigation.navigate('SignUp')}
             style={styles.button}
+          />          <Button 
+            type="info"
+            label="🧪 API Tests (Demo)"
+            onPress={() => navigation.navigate('APITestScreen')}
+            style={[styles.button, styles.apiTestButton]}
           />
         </View>
       </View>
@@ -84,6 +89,10 @@ const styles = StyleSheet.create({
     gap: 15,
   },
   button: {
-    width: '100%',
+    marginBottom: 15,
+  },
+  apiTestButton: {
+    backgroundColor: Colors.info || '#17a2b8',
+    marginTop: 20,
   },
 });

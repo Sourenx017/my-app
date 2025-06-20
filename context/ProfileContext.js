@@ -1,58 +1,107 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { auth } from '../firebase-config';
-import { onAuthStateChanged } from 'firebase/auth';
+import { AuthService } from '../services/api';
+import { ProfilesService } from '../services/apiExtended';
 
 export const ProfileContext = createContext({
   profile: null,
   setProfile: () => {},
   currentUser: null,
   isAuthenticated: false,
+  login: () => {},
+  logout: () => {},
+  register: () => {},
 });
 
 export function ProfileProvider({ children }) {
   const [profile, setProfileState] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Listen for Firebase auth state changes
+  // Check authentication status on app startup
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
-      if (user) {
-        loadProfile(user.uid);
-      }
-    });
-    
-    return () => unsubscribe();
+    checkAuthStatus();
   }, []);
 
-  // Load profile from AsyncStorage
-  const loadProfile = async (uid) => {
+  const checkAuthStatus = async () => {
     try {
-      const savedProfile = await AsyncStorage.getItem(`userProfile_${uid}`);
-      if (savedProfile) {
-        setProfileState(JSON.parse(savedProfile));
+      const authenticated = await AuthService.isAuthenticated();
+      setIsAuthenticated(authenticated);
+      
+      if (authenticated) {
+        // Load user profile from backend
+        await loadCurrentUserProfile();
       }
     } catch (error) {
-      console.log('Error loading profile:', error);
+      console.log('Error checking auth status:', error);
+      setIsAuthenticated(false);
     }
   };
 
-  // Save profile to AsyncStorage
+  // Load current user profile from backend
+  const loadCurrentUserProfile = async () => {
+    try {
+      const userProfile = await ProfilesService.getMyProfile();
+      setProfileState(userProfile);
+      setCurrentUser({ 
+        id: userProfile.userId,
+        email: userProfile.email || '',
+        name: userProfile.firstName + ' ' + userProfile.lastName
+      });
+    } catch (error) {
+      console.log('Error loading user profile:', error);
+    }
+  };
+
+  // Login function
+  const login = async (email, password) => {
+    try {
+      const result = await AuthService.login(email, password);
+      setIsAuthenticated(true);
+      await loadCurrentUserProfile();
+      return result;
+    } catch (error) {
+      console.log('Login error:', error);
+      throw error;
+    }
+  };
+
+  // Register function
+  const register = async (userData) => {
+    try {
+      const result = await AuthService.register(userData);
+      setIsAuthenticated(true);
+      await loadCurrentUserProfile();
+      return result;
+    } catch (error) {
+      console.log('Register error:', error);
+      throw error;
+    }
+  };
+
+  // Logout function
+  const logout = async () => {
+    try {
+      await AuthService.logout();
+      setIsAuthenticated(false);
+      setCurrentUser(null);
+      setProfileState(null);
+    } catch (error) {
+      console.log('Logout error:', error);
+    }
+  };
+
+  // Update profile function
   const setProfile = async (newProfile) => {
     try {
       if (newProfile) {
-        const uid = newProfile.uid || (currentUser && currentUser.uid);
-        if (uid) {
-          await AsyncStorage.setItem(`userProfile_${uid}`, JSON.stringify(newProfile));
-          setProfileState(newProfile);
-        }
-      } else {
-        // If newProfile is null, we're logging out
-        setProfileState(null);
+        const updatedProfile = await ProfilesService.updateMyProfile(newProfile);
+        setProfileState(updatedProfile);
+        return updatedProfile;
       }
     } catch (error) {
-      console.log('Error saving profile:', error);
+      console.log('Error updating profile:', error);
+      throw error;
     }
   };
 
@@ -60,7 +109,10 @@ export function ProfileProvider({ children }) {
     profile,
     setProfile,
     currentUser,
-    isAuthenticated: !!currentUser,
+    isAuthenticated,
+    login,
+    logout,
+    register,
   };
 
   return (

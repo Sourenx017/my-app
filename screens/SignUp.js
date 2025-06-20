@@ -12,47 +12,31 @@ import Button from "../components/controls/Button";
 import Colors from "../constants/Colors";
 import Fonts from "../constants/Fonts";
 import { useProfile } from "../context/ProfileContext";
-import { signupWithEmailAndPassword } from "../services/firebase-service";
 
 export default function SignUp({ navigation }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const { setProfile } = useProfile();
+  const { register } = useProfile();
 
   const handleSignUp = async () => {
     if (!name || !email || !password) {
       alert("Please fill in all fields");
       return;
-    }
-
-    if (password.length < 6) {
+    }    if (password.length < 6) {
       alert("Password should be at least 6 characters");
       return;
     }
 
     setLoading(true);
     try {
-      const userCredential = await signupWithEmailAndPassword(email, password);
-      const user = userCredential.user;
-
-      // Save user profile data
-      const newProfile = {
-        name,
-        email: user.email,
-        uid: user.uid,
-        emailVerified: user.emailVerified,
-        address: "",
-        phone: "",
-      };
-
-      setProfile(newProfile);
+      await register(email, password, name);
       alert("Registration successful! You can now log in.");
       navigation.navigate("Login");
     } catch (error) {
-      // Error handling is already done in the service
       console.log("Signup error:", error);
+      alert("Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }

@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, View, SafeAreaView } from "react-native";
+import { StyleSheet, View, SafeAreaView, Text } from "react-native";
 import { NavigationContainer } from '@react-navigation/native';
 import AppNavigator from './navigation';
 import { CartProvider } from './context/CartContext';
@@ -17,21 +17,22 @@ export default function App() {
     Montserrat_400Regular,
     Montserrat_700Bold,
   });
-
   if (!fontsLoaded) {
-    return null;
+    return (
+      <SafeAreaView style={styles.root}>
+        <View style={styles.container}>
+          <Text>Loading...</Text>
+        </View>
+      </SafeAreaView>
+    );
   }
 
   return (
     <SafeAreaView style={styles.root}>
       <ProfileProvider>
         <CartProvider>
-          <NavigationContainer>
-            <View style={styles.container}>
-              <StatusBar 
-                style="light" 
-                backgroundColor="#000000"
-              />
+          <NavigationContainer>            <View style={styles.container}>
+              <StatusBar style="light" />
               <AppNavigator />
             </View>
           </NavigationContainer>

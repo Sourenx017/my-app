@@ -36,6 +36,22 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: Colors.darkGray,
   },
+  info: {
+    backgroundColor: '#17a2b8',
+    elevation: 3,
+    shadowColor: Colors.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  danger: {
+    backgroundColor: '#dc3545',
+    elevation: 3,
+    shadowColor: Colors.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
   addToCart: {
     backgroundColor: Colors.darkGray,
     paddingVertical: 15,
@@ -53,6 +69,12 @@ const styles = StyleSheet.create({
   },
   secondaryText: {
     color: Colors.darkGray,
+  },
+  infoText: {
+    color: Colors.white,
+  },
+  dangerText: {
+    color: Colors.white,
   },
   addToCartText: {
     color: Colors.white,
