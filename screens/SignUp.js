@@ -7,6 +7,7 @@ import {
   Image,
   SafeAreaView,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import Button from "../components/controls/Button";
 import Colors from "../constants/Colors";
@@ -14,29 +15,53 @@ import Fonts from "../constants/Fonts";
 import { useProfile } from "../context/ProfileContext";
 
 export default function SignUp({ navigation }) {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
   const [loading, setLoading] = useState(false);
   const { register } = useProfile();
 
-  const handleSignUp = async () => {
-    if (!name || !email || !password) {
-      alert("Please fill in all fields");
-      return;
-    }    if (password.length < 6) {
-      alert("Password should be at least 6 characters");
-      return;
+  const validateForm = () => {
+    if (!formData.name || formData.name.trim() === "") {
+      Alert.alert("Validation Error", "Please enter a valid name");
+      return false;
     }
 
-    setLoading(true);
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.email || !emailRegex.test(formData.email)) {
+      Alert.alert("Validation Error", "Please enter a valid email address");
+      return false;
+    }
+
+    if (!formData.password || formData.password.length < 6) {
+      Alert.alert(
+        "Validation Error",
+        "Password must be at least 6 characters long"
+      );
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSignUp = async () => {
+    if (!validateForm()) return;
+
     try {
-      await register(email, password, name);
-      alert("Registration successful! You can now log in.");
-      navigation.navigate("Login");
+      setLoading(true);
+      await register({
+        name: formData.name.trim(),
+        email: formData.email.trim().toLowerCase(),
+        password: formData.password,
+      });
+      navigation.replace("Home");
     } catch (error) {
-      console.log("Signup error:", error);
-      alert("Registration failed. Please try again.");
+      Alert.alert(
+        "Registration Failed",
+        error.message || "An error occurred during registration"
+      );
     } finally {
       setLoading(false);
     }
@@ -46,67 +71,53 @@ export default function SignUp({ navigation }) {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <View style={styles.logoContainer}>
-          <Image
-            source={require("../assets/seiko.png")}
-            style={styles.logo}
-            resizeMode="contain"
-          />
+          <Image source={require("../assets/seiko.png")} style={styles.logo} />
         </View>
-
         <View style={styles.formContainer}>
           <Text style={styles.title}>Create Account</Text>
-
           <TextInput
             style={styles.input}
             placeholder="Name"
-            placeholderTextColor={Colors.gray}
-            value={name}
-            onChangeText={setName}
-            editable={!loading}
+            value={formData.name}
+            onChangeText={(text) =>
+              setFormData((prev) => ({ ...prev, name: text }))
+            }
+            autoCapitalize="words"
           />
           <TextInput
             style={styles.input}
             placeholder="Email"
-            placeholderTextColor={Colors.gray}
-            value={email}
-            onChangeText={setEmail}
+            value={formData.email}
+            onChangeText={(text) =>
+              setFormData((prev) => ({ ...prev, email: text }))
+            }
             keyboardType="email-address"
             autoCapitalize="none"
-            editable={!loading}
           />
           <TextInput
             style={styles.input}
             placeholder="Password"
-            placeholderTextColor={Colors.gray}
-            value={password}
-            onChangeText={setPassword}
+            value={formData.password}
+            onChangeText={(text) =>
+              setFormData((prev) => ({ ...prev, password: text }))
+            }
             secureTextEntry
-            editable={!loading}
           />
-
-          {loading ? (
-            <ActivityIndicator
-              size="large"
-              color={Colors.primary}
-              style={styles.loader}
-            />
-          ) : (
-            <Button
-              type="primary"
-              label="Create Account"
-              onPress={handleSignUp}
-              style={styles.signUpButton}
-            />
-          )}
-
+          <Button
+            title={
+              loading ? <ActivityIndicator color={Colors.white} /> : "Sign Up"
+            }
+            onPress={handleSignUp}
+            style={styles.signUpButton}
+            disabled={loading}
+          />
           <View style={styles.loginContainer}>
             <Text style={styles.loginText}>Already have an account?</Text>
             <Button
-              type="secondary"
-              label="Login"
+              title="Login"
               onPress={() => navigation.navigate("Login")}
               style={styles.loginButton}
-              disabled={loading}
+              type="outline"
             />
           </View>
         </View>
